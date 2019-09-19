@@ -1,27 +1,35 @@
 # LDAP server URL
-ldap_url: "ldap://ipa.example.com"
-ldap_ca: "{{ lookup('file', '/path/to/ca.crt') }}"
+ldap_url: "ldap://ipa.shared.example.opentlc.com"
 
-# LDAP BIND config for authentication and groups sync
-ldap_bind_dn: uid=admin,cn=users,cn=accounts,dc=example,dc=com
+# TLS certificate authority by Ansible file lookup
+ldap_ca: >-
+  {{ lookup("file", inventory_dir ~ "/../ldap-ca.crt") }}
+
+# LDAP BIND config for user authentication and groups sync
+ldap_bind_dn: uid=admin,cn=users,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com
 
 # Do not store secrets in version control!
-ldap_bind_password: "{{ lookup('env', 'LDAP_BIND_PASSWORD') }}"
+# LDAP bind password configured by environment variable
+ldap_bind_password: >-
+  {{ lookup("env", "LDAP_BIND_PASSWORD") }}
 
-# LDAP users group
-ldap_users_search_base: cn=users,cn=accounts,dc=example,dc=com
+# Location in LDAP for users and groups
+ldap_users_search_base: cn=users,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com
+ldap_groups_search_base: cn=groups,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com
 
-# LDAP search URL used during authentication
-ldap_auth_search_filter: "(memberOf=cn=ocp-users,cn=groups,cn=accounts,dc=example,dc=com)"
+# LDAP search filter URL used during authentication
 ldap_search_url: "{{ ldap_url }}/{{ ldap_users_search_base }}?uid?sub?{{ ldap_auth_search_filter }}"
 
-# LDAP group sync configuration
-ldap_cron_schedule: "@hourly"
+# This search filter enforces that users must belong to the ocp-users group
+ldap_auth_search_filter: "(memberOf=cn=ocp-users,cn=groups,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com)"
 
-# Groups path for LDAP search
-ldap_groups_search_base: cn=groups,cn=accounts,dc=example,dc=com
+# LDAP group sync schedule configuration
+ldap_cron_schedule: "*/5 * * * *"
 
-# Optional LDAP groups whitelist
-#ldap_groups_whitelist: |
-#  cn=ocp-admins,cn=groups,cn=accounts,dc=example,dc=com
-#  cn=ocp-users,cn=groups,cn=accounts,dc=example,dc=com
+# LDAP groups whitelist restricts groups synced from LDAP to OpenShift
+ldap_groups_whitelist: |
+  cn=ocp-users,cn=groups,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com
+  cn=ocp-platform,cn=groups,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com
+  cn=ocp-production,cn=groups,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com
+  cn=paymentapp,cn=groups,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com
+  cn=portalapp,cn=groups,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com
