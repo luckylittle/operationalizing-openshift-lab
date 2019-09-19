@@ -24,7 +24,7 @@ ldap_search_url: "{{ ldap_url }}/{{ ldap_users_search_base }}?uid?sub?{{ ldap_au
 ldap_auth_search_filter: "(memberOf=cn=ocp-users,cn=groups,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com)"
 
 # LDAP group sync schedule configuration
-ldap_cron_schedule: "*/5 * * * *"
+ldap_cron_schedule: "@hourly"
 
 # LDAP groups whitelist restricts groups synced from LDAP to OpenShift
 ldap_groups_whitelist: |
